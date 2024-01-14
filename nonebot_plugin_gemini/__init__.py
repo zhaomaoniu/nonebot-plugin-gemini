@@ -28,7 +28,7 @@ __plugin_meta__ = PluginMetadata(
     type="application",
     homepage="https://github.com/zhaomaoniu/nonebot-plugin-gemini",
     config=Config,
-    supported_adapters=None,
+    supported_adapters={"~onebot.v11", "~onebot.v12", "~telegram", "~feishu", "~github", "~qq", "~ding", "~console", "~kook", "~mirai", "~ntchat", "~minecraft", "~bilibili", "~villa", "~discord", "~red", "~satori", "~dodo"},
 )
 
 
