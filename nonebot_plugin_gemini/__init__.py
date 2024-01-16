@@ -6,11 +6,11 @@ from io import BytesIO
 from PIL import Image as PILImage
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
-from nonebot.plugin import PluginMetadata
 from nonebot.adapters import Message, Event, Bot
 from nonebot import require, get_driver, on_command
 from nonebot.params import CommandArg, ArgPlainText
 from google.generativeai.generative_models import ChatSession
+from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 from .config import Config
 
@@ -28,7 +28,7 @@ __plugin_meta__ = PluginMetadata(
     type="application",
     homepage="https://github.com/zhaomaoniu/nonebot-plugin-gemini",
     config=Config,
-    supported_adapters={"~onebot.v11", "~onebot.v12", "~telegram", "~feishu", "~github", "~qq", "~ding", "~console", "~kook", "~mirai", "~ntchat", "~minecraft", "~bilibili", "~villa", "~discord", "~red", "~satori", "~dodo"},
+    supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
 )
 
 
