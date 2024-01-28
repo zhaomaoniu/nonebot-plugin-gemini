@@ -53,3 +53,9 @@ Google Gemini AI 对话插件
 
 ## 配置
 在 [Google AI Studio](https://makersuite.google.com/app/apikey) 获取 `GOOGLE_API_KEY` 后，在 .env 文件 或 环境变量 中添加 `GOOGLE_API_KEY`
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| GOOGLE_API_KEY | 无 | Google AI Studio 的 API Key |
+| PROXY | 无 | 可选。代理地址，格式为 `http://ip:port` 或 `socks5://ip:port` |
+| IMAGE_RENDER_LENGTH | 500 | 可选。超过这个数值的回复将会以 Markdown 渲染为图片 |
