@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-plugin-gemini"
-version = "0.1.4"
+version = "0.1.5"
 description = "✨ Gemini AI 对话 NoneBot 插件 ✨"
 authors = [
     {name = "zhaomaoniu", email = "2667292003@qq.com"},
