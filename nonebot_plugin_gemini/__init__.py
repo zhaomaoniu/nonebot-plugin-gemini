@@ -76,7 +76,8 @@ async def _(event: Event, bot: Bot, message: Message = CommandArg()):
     msg = []
 
     for seg in uni_message:
-        if isinstance(seg, Text):
+        if isinstance(seg, Text) and seg.text.strip() != "":
+            # 防止空文本导致 Gemini 生成莫名其妙的回复
             msg.append(seg.text)
 
         elif isinstance(seg, Image):
