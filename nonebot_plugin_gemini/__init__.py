@@ -8,7 +8,7 @@ from nonebot.typing import T_State
 from nonebot.matcher import Matcher
 from nonebot.adapters import Message, Event, Bot
 from nonebot import require, get_driver, on_command
-from nonebot.params import CommandArg, ArgPlainText
+from nonebot.params import CommandArg, ArgPlainText, EventMessage
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 from .config import Config
@@ -17,7 +17,7 @@ from .gemini import Gemini, GeminiChatSession
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_htmlrender")
 
-from nonebot_plugin_alconna import UniMessage, Text, Image
+from nonebot_plugin_alconna import UniMessage, Text, Image, Reply
 from nonebot_plugin_htmlrender import md_to_pic
 
 
@@ -45,6 +45,16 @@ if GOOGLE_API_KEY is None:
 gemini = Gemini(GOOGLE_API_KEY, plugin_config.proxy)
 
 
+async def get_uni_reply(reply: Reply, event: Event, bot: Bot) -> UniMessage:
+    if reply.msg is None:
+        raise ValueError("回复为空")
+    
+    if isinstance(reply.msg, str):
+        return UniMessage(Text(reply.msg))
+    elif isinstance(reply.msg, Message):
+        return await UniMessage.generate(message=reply.msg, event=event, bot=bot)
+
+
 async def to_markdown(text: str) -> bytes:
     text = text.replace("•", "  *")
     return await md_to_pic(text, width=800)
@@ -70,10 +80,15 @@ conversation = on_command("geminichat", priority=5, block=True)
 
 
 @chat.handle()
-async def _(event: Event, bot: Bot, message: Message = CommandArg()):
+async def _(event: Event, bot: Bot, message: Message = CommandArg(), raw_message: Message = EventMessage()):
     uni_message = await UniMessage.generate(message=message, event=event, bot=bot)
+    uni_message_raw = await UniMessage.generate(message=raw_message, event=event, bot=bot)
 
     msg = []
+    reply = uni_message_raw[Reply, 0] if Reply in uni_message_raw else None
+
+    if reply is not None and reply.msg is not None:
+        uni_message = await get_uni_reply(reply, event, bot) + uni_message
 
     for seg in uni_message:
         if isinstance(seg, Text) and seg.text.strip() != "":
