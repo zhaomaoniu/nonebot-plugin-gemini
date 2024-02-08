@@ -48,9 +48,9 @@ gemini = Gemini(GOOGLE_API_KEY, plugin_config.proxy)
 async def get_uni_reply(reply: Reply, event: Event, bot: Bot) -> UniMessage:
     if reply.msg is None:
         raise ValueError("回复为空")
-    
+
     if isinstance(reply.msg, str):
-        return UniMessage(Text(reply.msg))
+        return UniMessage([Text(reply.msg)])
     elif isinstance(reply.msg, Message):
         return await UniMessage.generate(message=reply.msg, event=event, bot=bot)
 
@@ -70,6 +70,8 @@ async def to_image_data(image: Image) -> Union[BytesIO, bytes]:
     if image.url is not None:
         async with aiohttp.ClientSession() as session:
             async with session.get(image.url) as resp:
+                if resp.status != 200:
+                    raise ValueError(f"无法获取图片数据: {resp.status}")
                 return await resp.read()
 
     raise ValueError("无法获取图片数据")
@@ -80,15 +82,24 @@ conversation = on_command("geminichat", priority=5, block=True)
 
 
 @chat.handle()
-async def _(event: Event, bot: Bot, message: Message = CommandArg(), raw_message: Message = EventMessage()):
+async def _(
+    event: Event,
+    bot: Bot,
+    message: Message = CommandArg(),
+    raw_message: Message = EventMessage(),
+):
     uni_message = await UniMessage.generate(message=message, event=event, bot=bot)
-    uni_message_raw = await UniMessage.generate(message=raw_message, event=event, bot=bot)
+    uni_message_raw = await UniMessage.generate(
+        message=raw_message, event=event, bot=bot
+    )
 
     msg = []
     reply = uni_message_raw[Reply, 0] if Reply in uni_message_raw else None
 
     if reply is not None and reply.msg is not None:
-        uni_message = await get_uni_reply(reply, event, bot) + uni_message
+        uni_message = (await get_uni_reply(reply, event, bot)).include(
+            Image, Text
+        ) + uni_message
 
     for seg in uni_message:
         if isinstance(seg, Text) and seg.text.strip() != "":
@@ -125,7 +136,9 @@ async def start_conversation(
     if args.extract_plain_text() != "":
         matcher.set_arg(key="msg", message=args)
 
-    state["gemini_chat_session"] = GeminiChatSession(GOOGLE_API_KEY, plugin_config.proxy)
+    state["gemini_chat_session"] = GeminiChatSession(
+        GOOGLE_API_KEY, plugin_config.proxy
+    )
 
 
 @conversation.got("msg", prompt="对话开始")
