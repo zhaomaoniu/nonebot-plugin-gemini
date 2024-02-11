@@ -59,3 +59,13 @@ Google Gemini AI 对话插件
 | GOOGLE_API_KEY | 无 | Google AI Studio 的 API Key |
 | PROXY | 无 | 可选。代理地址，格式为 `http://ip:port` 或 `socks5://ip:port` |
 | IMAGE_RENDER_LENGTH | 500 | 可选。超过这个数值的回复将会以 Markdown 渲染为图片 |
+
+下面是网络搜索相关配置
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| ENABLE_SEARCH | false | 是否启用网络搜索，启用会导致回答时间加长，但能提高回答的准确率 |
+| GOOGLE_CUSTOM_SEARCH_KEY | 无 | Google Custom Search 的 API Key，可到 [此处](https://developers.google.com/custom-search/v1/overview?hl=zh-cn) 获取 |
+| GOOGLE_CUSTOM_SEARCH_CX | 无 | 可选。Google Custom Search 的 CX，可到 [此处](https://cse.google.com/cse/create/new) 创建 |
+| GOOGLE_CUSTOM_SEARCH_NUM | 3 | 可选。Google Custom Search 的搜索结果数量 |
+| SEARCH_KEYWORDS_PROMPT | ... | 可选。用 Gemini 提取搜索关键词时使用的提示词 |
