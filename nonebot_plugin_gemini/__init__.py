@@ -12,13 +12,14 @@ from nonebot.params import CommandArg, ArgPlainText, EventMessage
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
 from .config import Config
+from .search_engines import GoogleSearch
 from .gemini import Gemini, GeminiChatSession
 
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_htmlrender")
 
-from nonebot_plugin_alconna import UniMessage, Text, Image, Reply
 from nonebot_plugin_htmlrender import md_to_pic
+from nonebot_plugin_alconna import UniMessage, Text, Image, Reply
 
 
 __plugin_meta__ = PluginMetadata(
@@ -42,7 +43,22 @@ if GOOGLE_API_KEY is None:
     raise ValueError("GOOGLE_API_KEY 未配置, nonebot-plugin-gemini 无法运行")
 
 
-gemini = Gemini(GOOGLE_API_KEY, plugin_config.proxy)
+google_search = (
+    GoogleSearch(
+        plugin_config.google_custom_search_key,
+        plugin_config.google_custom_search_cx,
+        plugin_config.google_custom_search_num,
+        plugin_config.proxy,
+    )
+    if plugin_config.enable_search
+    else None
+)
+gemini = Gemini(
+    GOOGLE_API_KEY,
+    google_search,
+    plugin_config.proxy,
+    search_prompt=plugin_config.search_keywords_prompt,
+)
 
 
 async def get_uni_reply(reply: Reply, event: Event, bot: Bot) -> UniMessage:
@@ -113,7 +129,7 @@ async def _(
         await chat.finish("未获取到有效输入，输入应为文本或图片")
 
     try:
-        resp = await gemini.generate(msg)
+        resp = await gemini.generate(msg, plugin_config.enable_search)
     except Exception as e:
         await chat.finish(f"{type(e).__name__}: {e}")
 
@@ -137,7 +153,11 @@ async def start_conversation(
         matcher.set_arg(key="msg", message=args)
 
     state["gemini_chat_session"] = GeminiChatSession(
-        GOOGLE_API_KEY, plugin_config.proxy
+        GOOGLE_API_KEY,
+        plugin_config.enable_search,
+        google_search,
+        plugin_config.proxy,
+        search_prompt=plugin_config.search_keywords_prompt,
     )
 
 
