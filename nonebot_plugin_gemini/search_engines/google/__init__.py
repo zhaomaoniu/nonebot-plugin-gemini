@@ -8,7 +8,7 @@ from ..models import SearchResult, SearchResults
 
 class GoogleSearch:
     def __init__(
-        self, key: str, cx: str = "02f1a2bedcfb14d26", num: int = 3, proxy: str = None
+        self, key: str, cx: str = "02f1a2bedcfb14d26", num: int = 10, proxy: str = None
     ) -> None:
         self._params = {"key": key, "cx": cx, "num": num}
         self._proxy = proxy
@@ -33,5 +33,6 @@ class GoogleSearch:
                     SearchResult(
                         title=item["title"],
                         text=item["snippet"],
+                        url=item["link"],
                     ) for item in search_resp["items"]
                 ]
