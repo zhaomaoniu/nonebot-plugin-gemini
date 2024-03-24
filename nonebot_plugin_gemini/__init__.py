@@ -155,7 +155,10 @@ async def send_message_to_gemini(
                 logger.info(f"搜索功能调用: {fc.args['topic']}")
 
                 results = await google_search.get_results([fc.args["topic"]])
-                result = "\n\n".join(f"Title: {r['title']}\nURL: {r['url']}\nSnippet: {r['text']}" for r in results)
+                result = "\n\n".join(
+                    f"Title: {r['title']}\nURL: {r['url']}\nSnippet: {r['text']}"
+                    for r in results
+                )
                 response = await chat_session.send_message_async(
                     glm.Content(
                         parts=[
