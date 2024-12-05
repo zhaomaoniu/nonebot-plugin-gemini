@@ -26,7 +26,7 @@ from nonebot_plugin_alconna import UniMessage, Text, Image, Reply
 
 
 __plugin_meta__ = PluginMetadata(
-    name="nonebot-plugin-gemini",
+    name="Gemini",
     description="Gemini AI 对话",
     usage="gemini [文本/图片] -Gemini 生成回复\ngeminichat (可选)[文本] -开始 Gemini 对话\n结束对话 -结束 Gemini 对话",
     type="application",
@@ -76,7 +76,7 @@ search = glm.Tool(
         )
     ]
 )
-
+gemini_model_names = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.5-flash-8b"]
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
@@ -126,12 +126,7 @@ async def send_message_to_gemini(
     try:
         model = genai.GenerativeModel(
             model_name,
-            tools=(
-                search
-                if model_name == "gemini-pro" and plugin_config.enable_search
-                # 只有 Gemini Pro 支持 Function Call
-                else None
-            ),
+            tools=(search if plugin_config.enable_search else None),
         )
 
         chat_session = (
@@ -145,7 +140,7 @@ async def send_message_to_gemini(
         )
         resp = await chat_session.send_message_async(msg)
         # 检查是否需要调用搜索功能
-        if plugin_config.enable_search and model_name == "gemini-pro":
+        if plugin_config.enable_search:
             try:
                 fc = resp.candidates[0].content.parts[0].function_call
 
@@ -202,7 +197,7 @@ async def _(
 
     msg = []
     reply = uni_message_raw[Reply, 0] if Reply in uni_message_raw else None
-    model_name = "gemini-pro"
+    model_name = "gemini-1.5-flash"
 
     if reply is not None and reply.msg is not None:
         uni_message = (await get_uni_reply(reply, event, bot)).include(
@@ -212,10 +207,14 @@ async def _(
     for seg in uni_message:
         if isinstance(seg, Text) and seg.text.strip() != "":
             # 防止空文本导致 Gemini 生成莫名其妙的回复
+            for clip in seg.text.split():
+                if clip in gemini_model_names:
+                    model_name = clip
+                    seg.text = seg.text.replace(model_name, "").strip()
+                    break
             msg.append(glm.Part(text=seg.text))
 
         elif isinstance(seg, Image):
-            model_name = "gemini-pro-vision"
             image_data = await to_image_data(seg)
             info = fleep.get(image_data[:128])
 
@@ -234,6 +233,8 @@ async def _(
     if not msg:
         await chat.finish("未获取到有效输入，输入应为文本或图片")
 
+    logger.info(f"使用 Gemini 模型: {model_name}")
+
     result = await send_message_to_gemini(msg, model_name)
 
     await chat.finish(
@@ -251,7 +252,7 @@ async def start_conversation(
         matcher.set_arg(key="msg", message=args)
 
     state["gemini_chat_session"] = genai.GenerativeModel(
-        "gemini-pro", tools=search if plugin_config.enable_search else None
+        "gemini-1.5-flash", tools=search if plugin_config.enable_search else None
     ).start_chat(enable_automatic_function_calling=plugin_config.enable_search)
 
 
@@ -264,7 +265,7 @@ async def got_message(state: T_State, msg: str = ArgPlainText()):
 
     try:
         result = await send_message_to_gemini(
-            msg, "gemini-pro", chat_session=chat_session
+            msg, "gemini-1.5-flash", chat_session=chat_session
         )
     except Exception as e:
         await conversation.finish(f"发生意外错误，对话已结束\n{type(e).__name__}: {e}")

@@ -4,9 +4,14 @@ Google Gemini AI 对话插件
 ## 功能
 | 命令 | 用途 | 示例 |
 | --- | --- | --- |
-| gemini <文本/图像> | 单次调用 Gemini 并获取回复 | gemini 编写一个NoneBot2的echo插件 |
+| gemini <文本/图像> | 单次调用 Gemini 并获取回复 | gemini 编写一个 NoneBot2 的 echo 插件 |
 | geminichat [可选]<文本> | 开启一轮与 Gemini 的对话 | geminichat |
 | 结束对话 | 结束本轮对话 | 结束对话 |
+
+关于 `gemini` 命令的使用：
+1. 你可以回复某条消息，并在句首加上 `gemini` 来调用 Gemini，并将回复中的文本/图片发送给 Gemini
+2. 你可以在 `gemini` 后加上 Gemini 的模型名称来指定使用的模型，插件支持的模型有 `gemini-1.5-flash`(默认), `gemini-1.5-flash-8b`, `gemini-1.5-pro`。例如 `gemini gemini-1.5-pro 编写一个 NoneBot2 的 echo 插件`
+3. `geminichat` 仅支持调用 `gemini-1.5-flash` 模型，因为 `gemini-1.5-pro` 的每天免费调用次数仅为 50 次
 
 > 如果你配置了命令头，请在使用命令时将命令头加上
 
