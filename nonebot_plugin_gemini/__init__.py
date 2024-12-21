@@ -10,6 +10,7 @@ from nonebot.typing import T_State
 from nonebot.matcher import Matcher
 import google.generativeai as genai
 from nonebot import require, on_command
+from nonebot_plugin_uninfo import Uninfo
 import google.ai.generativelanguage as glm
 from nonebot.adapters import Message, Event, Bot
 from nonebot.params import CommandArg, ArgPlainText, EventMessage
@@ -179,8 +180,24 @@ async def send_message_to_gemini(
     return result
 
 
-chat = on_command("gemini", priority=10, block=True)
-conversation = on_command("geminichat", priority=5, block=True)
+def not_in_blacklist(session: Uninfo) -> bool:
+    user_id = session.user.id
+    scene_id = session.scene.id
+
+    if plugin_config.gemini_blacklist is None:
+        return True
+
+    if isinstance(plugin_config.gemini_blacklist, str):
+        plugin_config.gemini_blacklist = plugin_config.gemini_blacklist.split(",")
+
+    return (
+        user_id not in plugin_config.gemini_blacklist
+        and scene_id not in plugin_config.gemini_blacklist
+    )
+
+
+chat = on_command("gemini", priority=10, block=True, rule=not_in_blacklist)
+conversation = on_command("geminichat", priority=5, block=True, rule=not_in_blacklist)
 
 
 @chat.handle()
