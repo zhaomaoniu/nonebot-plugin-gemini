@@ -64,6 +64,7 @@ Google Gemini AI 对话插件
 | GOOGLE_API_KEY | 无 | Google AI Studio 的 API Key |
 | PROXY | 无 | 可选。代理地址，格式为 `http://ip:port` 或 `socks5://ip:port` |
 | IMAGE_RENDER_LENGTH | 500 | 可选。超过这个数值的回复将会以 Markdown 渲染为图片 |
+| GEMINI_BLACKLIST | 无 | 可选。Gemini 的黑名单，用于屏蔽用户或群组，每个 ID 之间用 `,` 分隔 |
 
 下面是网络搜索相关配置
 
